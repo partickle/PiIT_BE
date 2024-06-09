@@ -1,22 +1,38 @@
 from rest_framework import status
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Event
 from .serializers import EventSerializer
 
 
 class EventListCreateView(APIView):
+
     def get(self, request, *args, **kwargs):
         events = Event.objects.all()
         serializer = EventSerializer(events, many=True)
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
+        jwt_authenticator = JWTAuthentication()
+        try:
+            user_auth_tuple = jwt_authenticator.authenticate(request)
+            if user_auth_tuple is None:
+                raise AuthenticationFailed('Authentication failed')
+            user, _ = user_auth_tuple
+        except AuthenticationFailed as e:
+            return Response({'detail': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+
         serializer = EventSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer, user):
+        serializer.save(user=user)
+
 
 
 class EventDetailView(APIView):

@@ -1,6 +1,6 @@
 
 import os
-
+from dotenv import load_dotenv
 from datetime import timedelta
 from pathlib import Path
 
@@ -19,6 +19,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+load_dotenv()
 
 # Application definition
 
@@ -81,11 +82,11 @@ WSGI_APPLICATION = 'PiIT_BE.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'PiIT',
-        'USER': 'postgres',
-        'PASSWORD': '1332',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
 

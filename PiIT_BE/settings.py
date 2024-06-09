@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'authorization',
     'events',
     'news',
+    'employees',
 
 
 ]
